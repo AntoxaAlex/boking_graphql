@@ -16,4 +16,4 @@ const dbConnect = async (dbUrl)=>{
     }
 }
 
-module.exports = dbConnect
+module.exports = dbConnect;
