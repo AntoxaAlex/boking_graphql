@@ -1,5 +1,6 @@
 const Event = require("../models/event");
 const User = require("../models/user");
+const Booking = require("../models/booking")
 const {returnEvent} = require("../helpers/returnValues");
 
 
@@ -29,6 +30,7 @@ module.exports = {
             }else{
                 const event = await new Event({
                     title: args.eventInput.title,
+                    imageUrl: args.eventInput.imageUrl,
                     description: args.eventInput.description,
                     price:+args.eventInput.price,
                     date: new Date(args.eventInput.date),
@@ -38,8 +40,50 @@ module.exports = {
                 createdEvent = returnEvent(event)
                 foundUser.createdEvents.push(createdEvent._id)
                 await foundUser.save();
-                return createdEvent
             }
+
+            const events = await Event.find();
+            return events.map(event=>{
+                return returnEvent(event)
+            })
+        }catch (e) {
+            console.log(e.message);
+            throw e;
+        }
+    },
+    editEvent:async (args,req) => {
+        if(!req.isAuth){
+            throw new Error("Unauthenticated")
+        }
+        try {
+            const event = await Event.findByIdAndUpdate(args.eventId,args.eventInput,{new:true});
+            await event.save();
+            const events = await Event.find();
+            return events.map(event=>{
+                return returnEvent(event)
+            })
+
+        }catch (e) {
+            console.log(e.message);
+            throw e;
+        }
+    },
+    deleteEvent: async (args,req) => {
+        if(!req.isAuth){
+            throw new Error("Unauthenticated")
+        }
+        try {
+            const event = await Event.findById(args.eventId);
+            const user = await User.findById(event.creator);
+            await user.createdEvents.splice(user.createdEvents.indexOf(args.eventId),1);
+            await user.save();
+            await Booking.deleteMany({_id:{$in: event.bookings}});
+            await Event.findByIdAndRemove(args.eventId);
+            const events = await Event.find();
+            return events.map(event=>{
+                return returnEvent(event)
+            })
+
         }catch (e) {
             console.log(e.message);
             throw e;

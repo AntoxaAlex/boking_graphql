@@ -22,6 +22,12 @@ const userSchema = new mongoose.Schema({
             type:mongoose.Schema.Types.ObjectId,
             ref: "Event"
         }
+    ],
+    bookings:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"Booking"
+        }
     ]
 })
 

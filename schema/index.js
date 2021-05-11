@@ -14,24 +14,29 @@ const schema = buildSchema(`
         }
         
         type RootMutation {
-            createEvent(eventInput: EventInput): Event
+            createEvent(eventInput: EventInput): [Event!]
+            editEvent(eventId: ID!, eventInput: EventInput) : [Event!]
+            deleteEvent(eventId: ID!) : [Event!]
             register(registerInput: UserInput): User
             login(email:String!,password: String!): AuthData
-            bookEvent(eventId: ID!): Booking!
-            cancelBooking(eventId: ID!): [Booking!]
+            bookEvent(eventId: ID!): [Event!]
+            cancelBooking(eventId: ID!): [Event!]
         }
         
         type Event {
             _id: ID!
             title: String!
+            imageUrl: String!
             description: String!
             price: Float!
             date: String!
             creator: User!
+            bookings: [Booking!]
         }
         
         input EventInput {
             title: String!
+            imageUrl: String!
             description: String!
             price: Float!
             date: String!
@@ -50,6 +55,7 @@ const schema = buildSchema(`
             email: String!
             password: String
             createdEvents: [Event!]
+            bookings: [Booking!]
         }
         
         input UserInput {

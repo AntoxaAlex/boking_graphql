@@ -5,6 +5,10 @@ const eventSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    imageUrl:{
+        type: String,
+        required: true
+    },
     description:{
         type: String,
         required: true
@@ -20,7 +24,13 @@ const eventSchema = new mongoose.Schema({
     creator:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
-    }
+    },
+    bookings:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"Booking"
+        }
+]
 })
 
 module.exports = mongoose.model("Event",eventSchema)

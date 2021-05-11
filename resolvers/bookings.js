@@ -1,6 +1,7 @@
 const Event = require("../models/event");
-const Booking = require("../models/booking")
-const {returnBooking} = require("../helpers/returnValues");
+const Booking = require("../models/booking");
+const User = require("../models/user")
+const {returnBooking,returnEvent} = require("../helpers/returnValues");
 
 
 module.exports = {
@@ -26,13 +27,24 @@ module.exports = {
             throw new Error("Unauthenticated")
         }
         try {
+            console.log("Event id: "+args.eventId)
             const fetchedEvent = await Event.findById(args.eventId);
             const booking = new Booking({
                 user:req.userId,
                 event:fetchedEvent
             })
             await booking.save();
-            return returnBooking(booking)
+            await fetchedEvent.bookings.push(booking)
+            await fetchedEvent.save()
+
+            const user = await User.findById(req.userId);
+            await user.bookings.push(booking);
+            await user.save()
+
+            const events = await Event.find();
+            return events.map(event=>{
+                return returnEvent(event)
+            })
         }catch (e) {
             console.log(e.message);
             throw e;
@@ -46,11 +58,16 @@ module.exports = {
 
         try {
             const booking = await Booking.findOne({event: args.eventId});
-            const userId = booking.user;
-            await Booking.findOneAndRemove({event:args.eventId});
-            const bookings = await Booking.find({user:userId});
-            return bookings.map(booking=>{
-                return returnBooking(booking)
+            const user = await User.findById(req.userId);
+            await user.bookings.splice(user.bookings.indexOf(booking._id),1);
+            await user.save();
+            const event = await Event.findById(args.eventId);
+            await event.bookings.splice(user.bookings.indexOf(booking._id),1);
+            await event.save();
+            await Booking.findOneAndRemove({user:req.userId,event:args.eventId});
+            const events = await Event.find();
+            return events.map(event=>{
+                return returnEvent(event)
             })
 
         }catch (e) {
