@@ -1,7 +1,7 @@
 const Event = require("../models/event");
 const User = require("../models/user");
 const Booking = require("../models/booking")
-const {returnEvent} = require("../helpers/returnValues");
+const {returnEvent,returnEvents} = require("../helpers/returnValues");
 
 
 
@@ -38,14 +38,11 @@ module.exports = {
                 })
                 await event.save();
                 createdEvent = returnEvent(event)
-                foundUser.createdEvents.push(createdEvent._id)
+                await foundUser.createdEvents.push(createdEvent._id)
                 await foundUser.save();
             }
 
-            const events = await Event.find();
-            return events.map(event=>{
-                return returnEvent(event)
-            })
+            return returnEvents()
         }catch (e) {
             console.log(e.message);
             throw e;

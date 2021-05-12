@@ -17,7 +17,7 @@ const schema = buildSchema(`
             createEvent(eventInput: EventInput): [Event!]
             editEvent(eventId: ID!, eventInput: EventInput) : [Event!]
             deleteEvent(eventId: ID!) : [Event!]
-            register(registerInput: UserInput): User
+            register(registerInput: UserInput): AuthData
             login(email:String!,password: String!): AuthData
             bookEvent(eventId: ID!): [Event!]
             cancelBooking(eventId: ID!): [Event!]

@@ -65,9 +65,6 @@ class Events extends Component{
         })
         this.getAllEvents()
     }
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        this.getAllEvents()
-    }
     componentWillUnmount() {
         this.setState(prev=>{
             return{...prev,isComponentActive:false}
@@ -82,7 +79,14 @@ class Events extends Component{
     }
     closeModal = (name) => {
         this.setState(prev=>{
-            return{...prev,isModalOpened:{...prev.isModalOpened, [name]:false}}
+            return{...prev,isModalOpened:{...prev.isModalOpened, [name]:false},newEvent:{
+                    id:"",
+                    title: "",
+                    imageUrl: "",
+                    description: "",
+                    price: 0,
+                    date: ""
+                }}
         })
     }
 
@@ -104,17 +108,26 @@ class Events extends Component{
     }
 
     submitForm = (e) => {
+        const title = this.state.newEvent.title;
+        const description = this.state.newEvent.description;
+        const imageUrl = this.state.newEvent.imageUrl;
+        const price = parseFloat(this.state.newEvent.price);
+        const date = this.state.newEvent.date;
+
+        console.log(typeof price)
+
         e.preventDefault();
         fetch("http://localhost:4000/graphql",{
             method:"POST",
             body:JSON.stringify({
-                query: createEvent(
-                    this.state.newEvent.title,
-                    this.state.newEvent.description,
-                    this.state.newEvent.imageUrl,
-                    this.state.newEvent.price,
-                    this.state.newEvent.date
-                    )
+                query: createEvent(),
+                variables: {
+                    title,
+                    description,
+                    imageUrl,
+                    price,
+                    date
+                }
             }),
             headers:{
                 "Content-Type": "application/json",
@@ -124,11 +137,10 @@ class Events extends Component{
             if(res.status !== 200 && res.status !== 201){
                 throw new Error("Failed")
             }
-            if(this.state.isComponentActive) return res.json();
-        }).then(resData=>{
             if(this.state.isComponentActive){
+                this.getAllEvents();
                 this.setState(prev=>{
-                    return{...prev,events:resData.data.createEvent,isModalOpened:{...prev.isModalOpened, newEvent:false},newEvent:{
+                    return{...prev,isModalOpened:{...prev.isModalOpened, newEvent:false},newEvent:{
                             id:"",
                             title: "",
                             imageUrl: "",
@@ -138,24 +150,36 @@ class Events extends Component{
                         }}
                 })
             }
+        }).then(resData=>{
+            console.log(resData.data)
+            if(this.state.isComponentActive){
+                this.getAllEvents()
+            }
         }).catch(err=>{
             if(this.state.isComponentActive) console.log(err)
         })
     }
 
     submitChanges = (e) => {
+        const id = this.state.newEvent.id;
+        const title = this.state.newEvent.title;
+        const description = this.state.newEvent.description;
+        const imageUrl = this.state.newEvent.imageUrl;
+        const price = parseFloat(this.state.newEvent.price);
+        const date = this.state.newEvent.date;
         e.preventDefault();
         fetch("http://localhost:4000/graphql",{
             method:"POST",
             body:JSON.stringify({
-                query: editEvent(
-                    this.state.newEvent.id,
-                    this.state.newEvent.title,
-                    this.state.newEvent.imageUrl,
-                    this.state.newEvent.description,
-                    this.state.newEvent.price,
-                    this.state.newEvent.date
-                )
+                query: editEvent(),
+                variables: {
+                    id,
+                    title,
+                    imageUrl,
+                    description,
+                    price,
+                    date
+                }
             }),
             headers:{
                 "Content-Type": "application/json",
@@ -167,8 +191,8 @@ class Events extends Component{
             }
             if(this.state.isComponentActive) return res.json();
         }).then(resData=>{
-            this.setState(prev=>{
                 if(this.state.isComponentActive){
+                    this.setState(prev=>{
                     return{...prev,events:resData.data.editEvent,isModalOpened:{...prev.isModalOpened,editEvent:false},newEvent:{
                             id:"",
                             title: "",
@@ -177,8 +201,9 @@ class Events extends Component{
                             price: 0,
                             date: ""
                         }}
+                    })
+                    this.getAllEvents()
                 }
-            })
         }).catch(err=>{
             if(this.state.isComponentActive) console.log(err)
         })
@@ -188,7 +213,10 @@ class Events extends Component{
         fetch("http://localhost:4000/graphql",{
             method:"POST",
             body:JSON.stringify({
-                query: bookEvent(id)
+                query: bookEvent(),
+                variables: {
+                    id
+                }
             }),
             headers:{
                 "Content-Type": "application/json",
@@ -204,17 +232,21 @@ class Events extends Component{
                 this.setState(prev=>{
                     return{...prev,events:resData.data.bookEvent}
                 })
+                this.getAllEvents()
             }
         }).catch(err=>{
             if(this.state.isComponentActive) console.log(err)
         })
     }
 
-    cancelYourBooking = (eventId) => {
+    cancelYourBooking = (id) => {
         fetch("http://localhost:4000/graphql",{
             method:"POST",
             body:JSON.stringify({
-                query: cancelBooking(eventId)
+                query: cancelBooking(),
+                variables: {
+                    id
+                }
             }),
             headers:{
                 "Content-Type": "application/json",
@@ -230,6 +262,7 @@ class Events extends Component{
                 this.setState(prev=>{
                     return{...prev,events:resData.data.cancelBooking}
                 })
+                this.getAllEvents()
             }
         }).catch(err=>{
             if(this.state.isComponentActive) console.log(err)
@@ -260,7 +293,10 @@ class Events extends Component{
         fetch("http://localhost:4000/graphql",{
             method:"POST",
             body:JSON.stringify({
-                query: removeEvent(id)
+                query: removeEvent(),
+                variables: {
+                    id
+                }
             }),
             headers:{
                 "Content-Type": "application/json",
@@ -272,11 +308,12 @@ class Events extends Component{
             }
             if(this.state.isComponentActive) return res.json();
         }).then(resData=>{
-            this.setState(prev=>{
-                if(this.state.isComponentActive){
-                    return{...prev,events:resData.data.deleteEvent}
-                }
-            })
+            if(this.state.isComponentActive) {
+                this.setState(prev => {
+                    return {...prev, events: resData.data.deleteEvent}
+                })
+            }
+            this.getAllEvents()
         }).catch(err=>{
             if(this.state.isComponentActive) console.log(err)
         })
@@ -284,7 +321,7 @@ class Events extends Component{
 
     render() {
         return (
-            <Fragment>
+            <div className="container main_container">
                 <AuthContext.Consumer>
                     {(context)=>{
                         if(context.token){
@@ -296,6 +333,7 @@ class Events extends Component{
                                     >
                                         <NewEventForm
                                             inputData={{
+                                                type: "newEvent",
                                                 title:this.state.newEvent.title,
                                                 imageUrl: this.state.newEvent.imageUrl,
                                                 description: this.state.newEvent.description,
@@ -312,6 +350,7 @@ class Events extends Component{
                                     >
                                         <NewEventForm
                                             inputData={{
+                                                type: "editEvent",
                                                 title:this.state.newEvent.title,
                                                 imageUrl: this.state.newEvent.imageUrl,
                                                 description: this.state.newEvent.description,
@@ -339,27 +378,18 @@ class Events extends Component{
                                         />
                                     </Modal>
                                     }
-                                    <div className="newEventBtnDiv">
-                                        <button
-                                            className="newEventBtn ui green basic button"
-                                            type="button"
-                                            onClick={()=>this.openModal("newEvent")}
-                                        >
-                                            Create your event
-                                        </button>
-                                    </div>
                                 </Fragment>
                             )
                         }
                     }}
                 </AuthContext.Consumer>
-                <div className="ui stackable four column grid">
-                    {this.state.events.length >0 && this.state.events.map((event,i)=>{
+                <div id="eventsGrid" className="ui stackable four column grid">
+                    {this.state.events.length >0 && this.state.events.map(event=>{
                         return(
                             <div key={event._id} className="column">
                                 <div className="ui card centered">
                                     <div className="ui slide masked reveal image">
-                                        <img src={event.imageUrl}/>
+                                        <img alt="" src={event.imageUrl}/>
                                     </div>
                                     <div className="content">
                                         <div style={{textAlign:"center"}}>
@@ -369,21 +399,21 @@ class Events extends Component{
                                             <span className="date">Date: {event.date}</span>
                                         </div>
                                         <div className="description">
-                                            {event.description}
+                                            {event.description.length > 100 ? event.description.slice(0,100) + "..." : event.description}
                                         </div>
                                     </div>
                                     <div className="extra content">
                                         <span className="right floated">
                                             <div className="ui labeled button" tabIndex="0">
-                                                {this.context.userId !== event.creator._id && <Fragment>
+                                                {this.context.userId !== event.creator._id && this.context.token && <Fragment>
                                                     {event.bookings.filter(booking=>this.context.userId === booking.user._id).length > 0 ?
                                                         <div className="ui red button" onClick={()=>this.cancelYourBooking(event._id)}>Cancel</div>:
                                                             <div className="ui green button" onClick={()=>this.bookingEvent(event._id)}>Book</div>
                                                             }
                                                 </Fragment>}
-                                                <a className="ui basic green left pointing label">
+                                                <p className="ui basic green left pointing label">
                                                     {event.bookings.length}
-                                                </a>
+                                                </p>
                                             </div>
                                         </span>
                                         <span>
@@ -406,7 +436,18 @@ class Events extends Component{
                         )
                     })}
                 </div>
-            </Fragment>
+                <div className="newEventBtnDiv">
+                    <div className="newEventBtnDiv">
+                        <button
+                            className="transparentBtn"
+                            type="button"
+                            onClick={()=>this.openModal("newEvent")}
+                        >
+                            Create your event
+                        </button>
+                    </div>
+                </div>
+            </div>
         )
     }
 }

@@ -1,4 +1,4 @@
-import React, {Fragment} from 'react';
+import React from 'react';
 
 const ShowEvent = ({inputData}) => {
     const{
@@ -12,12 +12,14 @@ const ShowEvent = ({inputData}) => {
     } = inputData
     return (
         <div style={{padding:"15px"}}>
+            <div style={{textAlign: "center",marginBottom: "10px"}}>
+                <h2>{title}</h2>
+            </div>
             <div className="ui stackable two column grid showContentDiv">
                 <div className="column">
                     <img src={imageUrl} alt=""/>
                 </div>
                 <div className="column">
-                    <h2>{title}</h2>
                     <p>{description}</p>
                 </div>
             </div>

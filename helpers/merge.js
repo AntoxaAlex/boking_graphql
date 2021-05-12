@@ -49,8 +49,7 @@ const events = async eventIds => {
 
 const singleEvent = async eventId => {
     try {
-        const event = await eventLoader.load(eventId);
-        return event;
+        return await eventLoader.load(eventId);
     }catch (e) {
         console.log(e.message);
         throw e;

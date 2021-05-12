@@ -7,16 +7,14 @@ const Navbar = () => {
         <AuthContext.Consumer>
             {(context) => (
                 <header>
-                    <div className="ui pointing red menu">
+                    <div id="main-navbar" className="ui pointing blue  top fixed small menu">
                         <div className="header item">
+                            <i className="hand peace outline icon"/>
                             MyEvents
                         </div>
-                        <Link className="active item" to="/events">
+                        <Link className={context.token ? "active item" : "item"} to="/events">
                             Events
                         </Link>
-                        {context.token && <Link className="item" to="/bookings">
-                            Bookings
-                        </Link>}
                         <div className="right menu">
                             {context.token ? <div className="item">
                                 <button className="transparentBtn" type="button" onClick={context.logout}><i className="icon sign-out"/></button>

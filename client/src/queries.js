@@ -1,7 +1,7 @@
-export const loginQuery = (email,password) =>{
+export const loginQuery = () =>{
     return `
-                mutation {
-                    login(email: "${email}",password: "${password}"){
+                mutation LoginUser($email: String!, $password: String!) {
+                    login(email:$email, password:$password){
                         userId,
                         token
                         tokenExpiration
@@ -10,18 +10,18 @@ export const loginQuery = (email,password) =>{
             `
 }
 
-export const registerQuery = (fitstname,secondname,email,password) =>{
+export const registerQuery = () =>{
     return `
-    mutation {
+    mutation RegisterUser($firstname: String!, $secondname: String!, $email: String!, $password: String!){
         register(registerInput: {
-            firstname: "${fitstname}",
-            secondname: "${secondname}",
-            email: "${email}",
-            password: "${password}",
+            firstname: $firstname,
+            secondname: $secondname,
+            email: $email,
+            password: $password,
         }){
-            _id
-            firstname
-            secondname
+            userId,
+            token
+            tokenExpiration
         }
     }
 `
@@ -57,15 +57,15 @@ export const getAllEvents = () => {
     `
 }
 
-export const createEvent = (title,description,imageUrl,price,date) => {
+export const createEvent = () => {
     return`
-        mutation {
+        mutation CreateEvent($title:String!, $description:String!, $imageUrl:String!, $price:Float!, $date: String!){
             createEvent(eventInput:{
-                title: "${title}",
-                imageUrl: "${imageUrl}",
-                description: "${description}",
-                price: ${price},
-                date: "${date}"
+                title: $title,
+                imageUrl: $imageUrl,
+                description: $description,
+                price: $price,
+                date: $date
             }){
                 title
                 imageUrl
@@ -89,10 +89,10 @@ export const createEvent = (title,description,imageUrl,price,date) => {
     `
 }
 
-export const bookEvent = (eventId) => {
+export const bookEvent = () => {
     return `
-        mutation {
-            bookEvent(eventId: "${eventId}"){
+        mutation BookEvent($id: ID!){
+            bookEvent(eventId: $id){
                 title
                 imageUrl
                 description
@@ -115,10 +115,10 @@ export const bookEvent = (eventId) => {
     `
 }
 
-export const cancelBooking = (eventId) => {
+export const cancelBooking = () => {
     return `
-        mutation {
-            cancelBooking(eventId: "${eventId}"){
+        mutation CancelBooking($id: ID!){
+            cancelBooking(eventId: $id){
                 title
                 imageUrl
                 description
@@ -141,15 +141,15 @@ export const cancelBooking = (eventId) => {
     `
 }
 
-export const editEvent = (id,title,imageUrl,description,price,date) => {
+export const editEvent = () => {
     return`
-        mutation {
-            editEvent(eventId: "${id}", eventInput:{
-                title: "${title}",
-                imageUrl: "${imageUrl}",
-                description: "${description}",
-                price: ${price},
-                date: "${date}"
+        mutation EditEvent($id:ID!, $title:String!, $imageUrl:String!, $description:String!, $price:Float!, $date: String!){
+            editEvent(eventId: $id, eventInput:{
+                title: $title,
+                imageUrl: $imageUrl,
+                description: $description,
+                price: $price,
+                date: $date
             }){
                 title
                 imageUrl
@@ -173,10 +173,10 @@ export const editEvent = (id,title,imageUrl,description,price,date) => {
     `
 }
 
-export const removeEvent = (eventId) => {
+export const removeEvent = () => {
     return `
-        mutation{
-            deleteEvent(eventId: "${eventId}"){
+        mutation RemoveEvent($id: ID!){
+            deleteEvent(eventId: $id){
                 title
                 imageUrl
                 description

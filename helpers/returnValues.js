@@ -3,6 +3,13 @@ const {user,singleEvent,events,bookings} = require("./merge")
 const transformTime = require("./transformTime")
 
 
+const returnEvents = async () => {
+    const events = await Event.find();
+    return events.map(event=>{
+        return returnEvent(event)
+    })
+}
+
 const returnEvent = event => {
     return {
         ...event._doc,
@@ -36,3 +43,4 @@ const returnBooking = booking => {
 exports.returnUser = returnUser;
 exports.returnEvent = returnEvent;
 exports.returnBooking = returnBooking;
+exports.returnEvents = returnEvents;

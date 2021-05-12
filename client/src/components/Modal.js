@@ -1,6 +1,6 @@
-import React, {Fragment} from "react";
+import React from "react";
 
-const Modal = ({closeModal,inputData,children}) => {
+const Modal = ({closeModal,children}) => {
     return(
         <div className="front_court">
             <div className="modal_div">

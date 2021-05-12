@@ -38,8 +38,7 @@ app.use("/graphql",graphqlHTTP({
     //Valid graphql schema
     schema: mySchema,
     //JS object contains all resolver functions
-    rootValue: myResolvers,
-    graphiql: true
+    rootValue: myResolvers
 }));
 
 app.listen(port,()=>{

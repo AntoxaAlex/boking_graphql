@@ -1,4 +1,4 @@
-import React, {Component} from "react"
+import React, {Component, Fragment} from "react"
 import {BrowserRouter as Router, Route,Redirect,Switch} from "react-router-dom"
 
 //Stylesheets
@@ -9,9 +9,7 @@ import AuthContext from "./context/auth_context"
 
 //Components
 import Auth from "./components/Auth";
-import Event from "./components/Event";
 import Events from "./components/Events";
-import Bookings from "./components/Bookings";
 import Navbar from "./components/Navbar";
 
 
@@ -28,12 +26,20 @@ class App extends Component{
         })
     }
     logout = () => {
+        localStorage.clear()
         this.setState({
             token: null,
             userId: null,
             tokenExpiration: null
         })
     }
+
+    componentDidMount() {
+        if(localStorage.getItem("token") && localStorage.getItem("userId") && localStorage.getItem("tokenExpiration")){
+            this.login(localStorage.getItem("token"),localStorage.getItem("userId"),localStorage.getItem("tokenExpiration"))
+        }
+    }
+
     render() {
         return (
             <Router>
@@ -41,15 +47,13 @@ class App extends Component{
 
                     <Navbar/>
                     <Switch>
-                        <div className="container main_container">
+                        <Fragment>
                             {!this.state.token && <Redirect from="/" to="/auth" exact/>}
                             {this.state.token && <Redirect from="/" to="/events" exact/>}
                             {this.state.token && <Redirect from="/auth" to="/events" exact/>}
                             {!this.state.token && <Route path="/auth" component={Auth}/>}
                             <Route path="/events" component={Events}/>
-                            <Route exact path="/event/:id" component={Event}/>
-                            {this.state.token && <Route path="/bookings" component={Bookings}/>}
-                        </div>
+                        </Fragment>
                     </Switch>
                 </AuthContext.Provider>
             </Router>

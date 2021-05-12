@@ -22,16 +22,20 @@ module.exports = {
             const user = await User.findOne({email: args.registerInput.email});
             if(user){
                 throw new Error("User already exist")
-            }else {
-                const hashedPassword = await bcrypt.hash( args.registerInput.password,12);
-                const newUser = await new User({
-                    firstname: args.registerInput.firstname,
-                    secondname: args.registerInput.secondname,
-                    email: args.registerInput.email,
-                    password:hashedPassword
-                })
-                await newUser.save();
-                return returnUser(newUser)
+            }
+            const hashedPassword = await bcrypt.hash( args.registerInput.password,12);
+            const newUser = await new User({
+                firstname: args.registerInput.firstname,
+                secondname: args.registerInput.secondname,
+                email: args.registerInput.email,
+                password:hashedPassword
+            })
+            await newUser.save();
+            const token = jwt.sign({userId: newUser.id, userEmail: newUser.email},process.env.SECRET_KEY,{expiresIn: "1h"});
+            return {
+                userId: newUser.id,
+                token: token,
+                tokenExpiration: 1
             }
         }catch (e) {
             console.log(e.message);
@@ -45,15 +49,14 @@ module.exports = {
                 throw new Error("User not exist")
             }else{
                 const isMatched = await bcrypt.compare(args.password,foundUser.password);
-                if(isMatched){
-                    const token = jwt.sign({userId: foundUser.id, userEmail: foundUser.email},process.env.SECRET_KEY,{expiresIn: "1h"});
-                    return {
-                        userId: foundUser.id,
-                        token: token,
-                        tokenExpiration: 1
-                    }
-                }else{
+                if(!isMatched){
                     throw new Error("Wrong password")
+                }
+                const token = jwt.sign({userId: foundUser.id, userEmail: foundUser.email},process.env.SECRET_KEY,{expiresIn: "1h"});
+                return {
+                    userId: foundUser.id,
+                    token: token,
+                    tokenExpiration: 1
                 }
             }
         }catch (e) {
